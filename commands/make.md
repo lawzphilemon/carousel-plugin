@@ -12,6 +12,8 @@ Produce N carousels for one brand. Three rules run through every stage:
 - **Never default a contact.** Ask for the CTA contact (phone, email or link) for this campaign. Never reuse one from memory.
 - **No stage skips a gate.** Copy is approved before anything renders. The caption is approved before anything can be published.
 
+The `carousel` agent (`agents/carousel.md`) runs this flow unattended with a single review stop. This command keeps the three gates for manual use.
+
 Paths: `<workspace>` is the user's workspace. `<brands>` = `<workspace>/brands`. `<out>` = `<workspace>/carousel-output/<slug>`. `<project>` = the folder printed by `new`, `<out>/CAR-YYMMDD-XXXX_<topic-slug>/`. Talk to the user in their language.
 
 ## 1. Context

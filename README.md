@@ -6,7 +6,8 @@ A Claude Code plugin that turns a topic into a batch of brand-correct social car
 
 - Node 20 or newer. No npm dependencies.
 - Local Chrome or Chromium (used for rendering and visual lint). Pass `--chrome <path>` if it is not found automatically.
-- The Repliz MCP connected, only for `/carousel:publish`.
+- The Repliz MCP connected, only for publishing.
+- The Google Sheets connector, only for sheet tracking (optional).
 
 ## Install
 
@@ -23,7 +24,7 @@ claude --plugin-dir carousel-plugin
 | --- | --- |
 | `/carousel:brand` | Creates or updates a brand profile by short interview or by importing a guideline document, then runs the profile self-check. |
 | `/carousel:make` | Topic to copy, lint, render, visual lint and caption, with two approval gates. |
-| `/carousel:publish` | Uploads approved slides to Repliz and schedules them. Draft by default. |
+| `/carousel:publish` | Uploads approved slides to Repliz and schedules them. Draft by default. Then logs the row in the brand's sheet, if it has `tracking`. |
 
 ```
 /carousel:brand
@@ -80,6 +81,33 @@ Status moves forward only: `draft`, `copy_approved`, `rendered`, `caption_approv
 
 A batch of N carousels creates N sibling folders. Never commit `carousel-output/`; it is gitignored.
 
+## Agent mode
+
+The `carousel` agent (`agents/carousel.md`) builds carousels without asking questions and stops once for your review. Ask in plain words, for example: "make three carousels for acme about checking ad budget, CTA contact: none, no sources". It needs the brand, topic, count, CTA contact (or an explicit "no contact") and the facts with source and date (or "none").
+
+There are two stops:
+
+1. **Review.** If an input is missing, the agent answers `STATUS: NEEDS_INPUT` with a `MISSING:` list and does nothing else. Otherwise it builds every carousel to `caption_approved` and returns a `STATUS: REVIEW` report: contact sheet path, caption, assumptions, removed claims, open questions, and the Repliz accounts available. You ask for changes with `revise CAR-...: <notes>`.
+2. **Publish.** Nothing is scheduled until you approve each carousel with exactly this line (`at` is in the brand's timezone, `account` is the Repliz account id):
+
+```
+APPROVED: CAR-261030-A1B2 account: <id> at: 2026-11-03 11:00 live: false
+```
+
+A carousel without a valid line is left untouched and reported `REFUSED`. Statuses: `NEEDS_INPUT`, `REVIEW`, `BLOCKED` (per carousel, with the reason), `REFUSED`, `PUBLISHED`. A draft still needs a manual publish in Repliz.
+
+The agent locates the plugin files through `${CLAUDE_PLUGIN_ROOT}`; if that is not substituted inside the agent, it falls back to finding them with Glob. This variant is unverified until the release checklist has been run.
+
+## Sheet tracking
+
+Optionally, every scheduled carousel is logged as a row in a Google Sheet: one shared spreadsheet with one tab per brand, or a separate sheet per brand. Add a `tracking` block to the brand (see `examples/acme/brand.json`, with the fictional `EXAMPLE_SHEET_ID`): `sheet_id`, `tab`, `mode` (`append` or `update`), `match_column` and `match_by`, `columns` (the header names of your tab) and `status_values.scheduled`. `/carousel:brand` asks for these. A brand without `tracking` skips the step.
+
+- Share the sheet as **Editor** with the Google account connected to Claude. A sheet owned by another account fails the access check.
+- Header names are matched exactly against row 1 of the tab. Unmapped columns stay empty.
+- Re-running does not duplicate a row (append mode checks the match column first); update mode only fills the row that matches and never appends.
+- A written value that starts with `=`, `+`, `-` or `@` gets a leading apostrophe so the sheet keeps it as text.
+- If anything fails, `sheet-row.csv` stays in the carousel folder (header row plus the row) and the failure is reported with the sheet and tab. Tracking never blocks, changes or undoes a schedule.
+
 ## Repliz
 
 - The Repliz MCP must be connected in Claude Code.
@@ -88,7 +116,7 @@ A batch of N carousels creates N sibling folders. Never commit `carousel-output/
 
 ## CLI
 
-The commands call `engine/cli.mjs`. Each prints JSON on stdout and a summary on stderr; exit code 1 means issues.
+The eight commands call `engine/cli.mjs`. Each prints JSON on stdout and a summary on stderr; exit code 1 means issues.
 
 - `lint`: check a brand profile (`--self-check`) or a project (`--stage text|visual`).
 - `render`: render a project's `copy.json` to slide PNGs.
@@ -96,7 +124,8 @@ The commands call `engine/cli.mjs`. Each prints JSON on stdout and a summary on 
 - `knowledge`: resolve which skills to use per role, with fallbacks.
 - `publish-payload`: build the exact Repliz schedule payload (a dry run; sends nothing).
 - `status`: print a project's status and verification result.
-- `meta`: update status and Repliz fields in `meta.json`.
+- `meta`: update status and Repliz fields in `meta.json`; `--tracked written|csv|skipped` records the sheet result.
+- `sheet-row`: build the sheet row for a scheduled carousel and write `sheet-row.csv` (offline; a brand without `tracking` prints `"tracked": false`).
 
 ## Tests
 

@@ -1,6 +1,6 @@
 # Agent mode and Google Sheet tracking: design
 
-Date: 2026-10-29. Status: draft for review. Extends `2026-10-29-carousel-plugin-design.md` (v0.1.0). Target release: 0.2.0.
+Date: 2026-10-29. Status: implemented in 0.2.0. Extends `2026-10-29-carousel-plugin-design.md` (v0.1.0). Target release: 0.2.0.
 
 ## 1. Goal
 
@@ -61,7 +61,13 @@ CAROUSELS:
       <full caption text>
     assumptions: [..]    removed_claims: [..]   open_questions: [..]
   - code: ...  STATUS: BLOCKED  reason: <lint output>
+accounts_available:
+  - id: <repliz account id>  name: <account name>  platform: <platform>
+TO PUBLISH, reply with one line per carousel:
+  APPROVED: <code> account: <id> at: YYYY-MM-DD HH:mm live: false
 ```
+
+`accounts_available` comes from one `repliz_list_accounts` call (`unavailable` if the call fails).
 
 The caller shows the user the contact sheet paths and captions and relays the answer.
 
@@ -72,10 +78,10 @@ Feedback from the user is passed back verbatim ("revise CAR-... : <notes>"). The
 Only on a dispatch that contains an approval of this shape, per carousel:
 
 ```
-APPROVED: CAR-...   account: <repliz account id or name>   at: YYYY-MM-DD HH:mm   live: false
+APPROVED: CAR-...   account: <repliz account id>   at: YYYY-MM-DD HH:mm   live: false
 ```
 
-Without it the agent refuses and returns `STATUS: REFUSED` (reason: missing approval). With it, the agent follows `commands/publish.md` steps 1-7 (status and gates, upload, `publish-payload`, `repliz_create_schedule`, read-back, `meta --status scheduled ...`) and then runs tracking (section 4). `live: true` is accepted only when the approval says so. It never schedules to an account the caller did not name in the approval.
+Without it the agent refuses and returns `STATUS: REFUSED` (reason: missing approval). With it, the agent follows the steps of `commands/publish.md` (status and gates, upload, `publish-payload`, `repliz_create_schedule`, read-back, `meta --status scheduled ...`) and then runs tracking (section 4). `at` is in the brand's timezone (the CLI converts it to UTC). `live: true` is accepted only when the approval says so. It never schedules to an account the caller did not name in the approval.
 
 Stops and returns `STATUS: PUBLISHED` with schedule ids and the tracking result.
 
@@ -121,16 +127,17 @@ New command `sheet-row --project <dir> --brands <dir>` (8th command; added to `C
              "Scheduled": "2026-11-03T04:00:00.000Z", "Account": "...", "Repliz ID": "...", "Folder": "..." } }
 ```
 
-`tracked: false` when the brand has no `tracking`. It refuses (exit 1) unless `meta.status` is `scheduled` and `repliz.schedule_id` is set, so a row can only describe a confirmed schedule. `meta` gains `--tracked <written|csv|skipped>` which stores `meta.tracking = {state, at}` for the record. The command also writes `sheet-row.csv` (header row plus the row, cells in `expected_headers` order) into the project folder so the fallback always exists.
+`tracked: false` when the brand has no `tracking`. It refuses (exit 1) unless `meta.status` is `scheduled` and `repliz.schedule_id` is set, so a row can only describe a confirmed schedule. `meta` gains `--tracked <written|csv|skipped>` which stores `meta.tracking = {state, at}` for the record: `written` after a sheet write (or an idempotent no-op), `csv` after a fallback, `skipped` for a brand without `tracking` and when `sheet-row` itself fails. The command also writes `sheet-row.csv` (header row plus the row, cells in `expected_headers` order) into the project folder so the fallback always exists.
 
 ### 4.3 Agent procedure (after a confirmed schedule)
 Uses the Google Sheets MCP tools; the engine does no network I/O.
 1. `get_spreadsheet(sheet_id)`: if it fails (no access, wrong Google account), fall back (4.4).
 2. Confirm the tab exists. Read row 1 of the tab (`get_values`). Every name in `expected_headers` must be present; otherwise fall back.
 3. Idempotency: read the match column; if the value is already present (append mode), do nothing more and record `written`.
-4. `append`: build the row in the sheet's header order from `cells` (unmapped columns empty) and `append_values` to that tab only. `update`: find the row whose match column equals `match.value`, then `update_values` only the mapped cells of that row; if no row matches, fall back (never append in update mode).
-5. Record `meta --tracked written`.
-6. Never read or write any other tab.
+4. `append`: build the row in the sheet's header order from `cells` (unmapped columns empty) and `append_values` to that tab only. `update`: find the row whose match column equals `match.value`, then `update_values` only the mapped cells of that row; if no row matches (or more than one), fall back (never append in update mode).
+5. The Sheets tools expose no input-mode option, so prefix a single quote (`'`) to every written value that starts with `=`, `+`, `-` or `@`, so it stays literal text. Never alter match lookups or header names.
+6. Record `meta --tracked written`.
+7. Never read or write any other tab.
 
 ### 4.4 Failure handling
 Any failure leaves the Repliz schedule untouched. The agent keeps `sheet-row.csv`, records `meta --tracked csv`, and reports which brand, sheet and tab failed and why (for example "this sheet belongs to a different Google account than the one connected"). It does not retry in a loop and does not choose a different sheet.

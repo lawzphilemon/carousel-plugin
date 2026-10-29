@@ -88,3 +88,19 @@ test("carousel agent: front matter, statuses, sources, no questions", () => {
   const order = ["STATUS: NEEDS_INPUT", "STATUS: REVIEW", "APPROVED: <code> account:"].map((w) => s.indexOf(w));
   assert.ok(order.every((n) => n >= 0) && order[0] < order[1] && order[1] < order[2], "section order: input check, review, publish");
 });
+
+test("release 0.2.0 docs: README, commands, changelog, version, specs", () => {
+  const readme = read("README.md");
+  for (const w of ["Agent mode", "Sheet tracking", "Editor", "sheet-row.csv", "APPROVED:"]) assert.ok(readme.includes(w), `README missing ${w}`);
+  assert.match(read("commands/publish.md"), /tracking/);
+  assert.match(read("commands/publish.md"), /tracked/);
+  assert.match(read("commands/publish.md"), /without `tracking`[^\n]*skip/i);
+  assert.match(read("commands/brand.md"), /tracking/);
+  assert.equal(JSON.parse(read(".claude-plugin/plugin.json")).version, "0.2.0");
+  const cl = read("CHANGELOG.md");
+  assert.match(cl, /^## 0\.2\.0\b/m);
+  assert.match(cl, /^## 0\.1\.1\b/m);
+  assert.doesNotMatch(cl, /^## Unreleased/m);
+  assert.ok(read("docs/superpowers/specs/2026-10-29-carousel-plugin-design.md").includes("sheet-row"));
+  assert.ok(read("docs/superpowers/specs/2026-10-29-agent-mode-and-sheet-tracking-design.md").includes("Status: implemented in 0.2.0"));
+});

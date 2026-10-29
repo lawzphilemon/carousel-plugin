@@ -97,7 +97,7 @@ Publish only on a dispatch with one line per carousel in exactly this shape:
 APPROVED: <code> account: <id> at: YYYY-MM-DD HH:mm live: <true|false>
 ```
 
-`at` is in the brand's timezone. A carousel without a valid line (missing account, date and time, or `live`) is not touched: list it as `REFUSED` with `reason: missing approval` in the same final message, while the approved ones proceed. If no carousel is approved, the overall status is `STATUS: REFUSED`. Never schedule to an account not named in its approval line. Use `--live` only when the line says `live: true`.
+`at` is in the brand's timezone. A carousel without a valid line (missing account, date and time, or `live`) is not touched: list it as `REFUSED` with `reason: missing approval` in the same final message, while the approved ones proceed. If no carousel is approved, the overall status is `STATUS: REFUSED`. If every carousel in the dispatch ends `BLOCKED` or `REFUSED` and none was published, the overall status is `STATUS: REFUSED` when none was approved and `STATUS: BLOCKED` otherwise. Never schedule to an account not named in its approval line. Use `--live` only when the line says `live: true`.
 
 Never change the approved account or time. For each approved carousel follow `commands/publish.md`:
 
@@ -115,8 +115,8 @@ Run only after `meta.status` is `scheduled`. Tracking never blocks, changes or u
 node "<root>/engine/cli.mjs" sheet-row --project "<project>" --brands "<brands>"
 ```
 
-- Exit non-zero (brand invalid, empty topic, missing schedule id): no CSV was written. Run `meta --tracked skipped` and report `tracking: failed (<the CLI message>)`.
-- JSON `"tracked": false`: the brand has no tracking. Run `meta --tracked skipped` and say nothing else.
+- Exit non-zero (brand invalid, empty topic, missing schedule id): no CSV was written. Run `meta --project "<project>" --tracked skipped` and report `tracking: failed (<the CLI message>)`.
+- JSON `"tracked": false`: the brand has no tracking. Run `meta --project "<project>" --tracked skipped` and say nothing else.
 - Otherwise take `sheet_id`, `tab`, `mode`, `expected_headers`, `cells` and `match` from that JSON and use the Google Sheets tools:
 
 1. `get_spreadsheet` on `sheet_id`. If it fails (no access, other Google account) or `tab` is not in it: fall back.

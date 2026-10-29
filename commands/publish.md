@@ -57,3 +57,24 @@ node "${CLAUDE_PLUGIN_ROOT}/engine/cli.mjs" meta --project "<project>" --status 
 ```
 
 Finish with the list of codes, accounts, times and whether each is a draft. Remind the user that a draft still needs a manual publish in Repliz.
+
+## 7. Track in the sheet
+
+Run only after the read-back matched and `meta --status scheduled` was recorded. Tracking never blocks, changes or undoes a schedule. A brand without `tracking` skips this step silently.
+
+```
+node "${CLAUDE_PLUGIN_ROOT}/engine/cli.mjs" sheet-row --project "<project>" --brands "<brands>"
+```
+
+- Exit non-zero (brand invalid, empty topic, missing schedule id): no CSV was written. Run `meta --project "<project>" --tracked skipped` with the same CLI path and tell the user the CLI message.
+- JSON `"tracked": false`: the brand has no `tracking`. Run `node "${CLAUDE_PLUGIN_ROOT}/engine/cli.mjs" meta --project "<project>" --tracked skipped` and say nothing else.
+- Otherwise take `sheet_id`, `tab`, `mode`, `expected_headers`, `cells` and `match` from the JSON and use the Google Sheets tools:
+
+1. `get_spreadsheet` on `sheet_id`. If it fails (no access, other Google account) or `tab` is not in it: fall back.
+2. `get_values` on row 1 of `tab`. Every name in `expected_headers` must be a header; otherwise fall back. A header's column letter comes from its index in row 1 (A, B, ... Z, AA). In A1 ranges, quote a tab name with spaces or symbols, for example `'My Tab'!A1`.
+3. Read the `match.column` column. In append mode, if `match.value` is already there, write nothing and record `written`.
+4. Append mode: build one row in the sheet's header order from `cells` (unmapped columns empty) and `append_values` to `'<tab>'!A1`. Update mode: find the row whose `match.column` equals `match.value` (case-insensitive when `match.by` is `topic`) and `update_values` only the mapped cells of that row. No matching row, or more than one: fall back. Never append in update mode.
+5. Neutralize formula-like values before writing: for every cell value you write that starts with `=`, `+`, `-` or `@`, prefix a single quote (`'`) so it stays literal text. Never alter the match value used for lookups or the header names; apply the prefix only to the values written.
+6. Never read or write any other tab or sheet. Do not retry in a loop.
+
+On success run `node "${CLAUDE_PLUGIN_ROOT}/engine/cli.mjs" meta --project "<project>" --tracked written`. Fall back means: keep `sheet-row.csv` (written by the successful `sheet-row` run), run `meta --project "<project>" --tracked csv` with the same CLI path, and tell the user which brand, sheet and tab failed and why (for example the sheet belongs to a different Google account than the one connected to Claude). The schedule stays as it is.

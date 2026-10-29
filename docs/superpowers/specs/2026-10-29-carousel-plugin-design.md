@@ -55,7 +55,7 @@ Stages, with gates:
 Section 9. Default is draft; scheduling live requires an explicit yes.
 
 ### 4.4 Engine CLI
-`engine/cli.mjs` has seven commands: `lint`, `render`, `new`, `knowledge`, `publish-payload`, `status`, `meta`. `status` prints a project's `meta.json` status and verification result. Status and Repliz field updates go through `meta`, never by hand-editing `meta.json`.
+`engine/cli.mjs` has eight commands: `lint`, `render`, `new`, `knowledge`, `publish-payload`, `status`, `meta`, `sheet-row`. `status` prints a project's `meta.json` status and verification result. Status and Repliz field updates go through `meta`, never by hand-editing `meta.json`. Agent mode and Google Sheet tracking (`sheet-row`) are specified in `2026-10-29-agent-mode-and-sheet-tracking-design.md`.
 
 ## 5. Brand profile (`brand.json`)
 

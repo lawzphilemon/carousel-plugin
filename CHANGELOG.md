@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 - 2026-10-29
+
+- Add: `carousel` subagent (single review stop, approval-gated publish).
+- Add: optional per-brand `tracking` block and validation.
+- Add: `sheet-row` command and `meta --tracked`.
+- Add: Google Sheet tracking step in `/carousel:publish` and the agent (shared sheet with a tab per brand, idempotent, CSV fallback).
+- Docs: README sections "Agent mode" and "Sheet tracking".
+
+## 0.1.1 - 2026-10-29
 
 - Fix: render can run again (after a visual-lint fix or a slide change) from `copy_approved`, `rendered` or `caption_approved`; it resets status to `rendered` and deletes stale `verification.json` and slide PNGs.
 - Fix: engine enforces the gates: `render` and `meta --status copy_approved` need a fresh passing text lint; `meta --status caption_approved` needs a passing visual lint and a fresh text lint of `caption.txt`.
