@@ -374,6 +374,7 @@ test("sheet-row writes JSON and CSV for a tracked scheduled project", () => {
   assert.equal(r.code, 0, r.stderr);
   const row = out(r);
   assert.equal(row.tracked, true);
+  assert.deepEqual([row.sheet_id, row.tab, row.mode], ["EXAMPLE_SHEET_ID", "Acme", "append"]);
   assert.equal(row.cells.Code, JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")).code);
   const csv = fs.readFileSync(path.join(dir, "sheet-row.csv"), "utf8");
   assert.equal(csv, rowToCsv(row));

@@ -13,6 +13,8 @@ const dir = "/out/acme/CAR-261030-A1B2_three-numbers";
 test("builds the full row", () => {
   const r = buildSheetRow(meta(), brand(), dir);
   assert.equal(r.tracked, true);
+  assert.deepEqual([r.sheet_id, r.tab, r.mode], ["EXAMPLE_SHEET_ID", "Acme", "append"]);
+  assert.deepEqual(Object.keys(r).slice(0, 4), ["tracked", "sheet_id", "tab", "mode"]);
   assert.deepEqual(r.expected_headers, ["Code", "Topic", "Status", "Scheduled", "Account", "Repliz ID", "Folder"]);
   assert.equal(r.cells.Status, "Scheduled (draft)");
   assert.equal(r.cells.Folder, "acme/CAR-261030-A1B2_three-numbers");

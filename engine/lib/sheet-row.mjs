@@ -24,6 +24,9 @@ export function buildSheetRow(meta, brand, projectDir) {
   if (by === "topic" && !topic) throw new Error("topic is empty: cannot match a sheet row by topic");
   return {
     tracked: true,
+    sheet_id: t.sheet_id,
+    tab: t.tab,
+    mode: t.mode,
     expected_headers: keys.map((k) => t.columns[k]),
     cells,
     match: { column: t.match_column, by, value: by === "topic" ? topic : meta.code },
