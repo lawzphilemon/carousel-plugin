@@ -1,0 +1,16 @@
+{
+  "code": "CAR-261030-A1B2",
+  "brand": "acme",
+  "topic": "Reading ad results without guesswork",
+  "platform": "instagram",
+  "slides": [
+    { "kind": "cover", "pill": "Ads basics", "headline": "Read your ad results without guessing.", "accent": "without guessing", "sub": "A short guide for small teams." },
+    { "kind": "statement", "headline": "Most reports hide the one number you need.", "body": "We open every report with ROAS, because it links spend to revenue in one line. Everything else supports it." },
+    { "kind": "points", "kicker": "Step 1", "headline": "Start with the 3 angka that matter.", "items": ["Spend per week.", "Revenue from ads.", "ROAS for the same week."] },
+    { "kind": "points", "kicker": "Step 2", "headline": "Compare weeks, not single days.", "items": ["Daily numbers swing a lot.", "Weekly numbers show the trend.", "Note any change you made."] },
+    { "kind": "points", "kicker": "Step 3", "headline": "Change one thing at a time.", "items": ["Pick one audience or one creative.", "Wait a full week.", "Keep what moved ROAS."] },
+    { "kind": "stat", "headline": "Set a ROAS target before you scale.", "stat": { "value": "4:1", "label": "Example ROAS target for a first test" }, "sub": "Pick your own number from your margins." },
+    { "kind": "cta", "headline": "Want ads with clear results?", "sub": "Tell us your target.", "button": "Message us" }
+  ],
+  "caption": "Most ad reports bury the one number that matters. Start with ROAS, compare weeks, and change one thing at a time. Save this for your next review. 🙂"
+}

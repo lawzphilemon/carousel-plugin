@@ -1,0 +1,69 @@
+{
+  "slug": "acme",
+  "name": "Acme Studio",
+  "handle": "@acme.studio",
+  "language": "en",
+  "timezone": "Asia/Jakarta",
+  "canvas": { "width": 1080, "height": 1350 },
+  "palette": {
+    "background_dark": "#14213D",
+    "background_light": "#FFFFFF",
+    "accent": "#FCA311",
+    "text_on_dark": "#FFFFFF",
+    "text_on_light": "#14213D",
+    "muted": "#A8B0BF",
+    "card": "#F1F3F7",
+    "forbidden": ["#FF0000"]
+  },
+  "contrast_pairs": [
+    { "fg": "#FCA311", "bg": "#14213D", "min": 4.5 },
+    { "fg": "#FFFFFF", "bg": "#14213D", "min": 4.5 },
+    { "fg": "#14213D", "bg": "#FFFFFF", "min": 4.5 }
+  ],
+  "fonts": {
+    "family": "Montserrat",
+    "file": "fonts/Montserrat-Variable.ttf",
+    "weights": { "hook": 800, "title": 800, "body": 500, "caption": 500 },
+    "sizes_px": { "hook": [96, 120], "title": [64, 80], "body": [38, 44], "caption": [26, 30] },
+    "max_weights_per_slide": 2
+  },
+  "logos": {
+    "on_dark": "logos/logo-on-dark.png",
+    "on_light": "logos/logo-on-light.png",
+    "on_accent": "logos/logo-on-light.png",
+    "width_px": { "cover": 360, "content": 200, "cta": 360 },
+    "min_width_px": 160
+  },
+  "layout": { "margin_px": 80, "max_body_words": 35, "max_headline_words": 9, "slides": [5, 10] },
+  "voice": {
+    "pov": "we",
+    "address": { "instagram": "you", "linkedin": "you" },
+    "tone": "friendly, direct, plain business language",
+    "use": ["clear", "measurable"],
+    "avoid": ["guaranteed", "cheapest", "discount"],
+    "acronyms": ["ROAS", "SEO", "CTR", "ROI"],
+    "emoji_max": { "instagram": 1, "linkedin": 0 },
+    "exclamation": false,
+    "all_caps_emphasis": false,
+    "caption_formula": ["hook", "body", "proof", "cta"]
+  },
+  "hard_rules": {
+    "no_prices": true,
+    "claims_need_source": true,
+    "no_client_names": true,
+    "client_name_blocklist": ["Globex"],
+    "headline_case": "sentence",
+    "headline_ends_with_period": true
+  },
+  "cta": {
+    "standard": [{ "pillar": "ads", "line": "Want ads with clear results? Tell us your target." }],
+    "button": { "label_style": "verb-first, 2-3 words", "bg": "#14213D", "fg": "#FFFFFF" },
+    "contact": null
+  },
+  "pillars": [
+    { "id": "ads", "label": "Ads", "share": 0.6 },
+    { "id": "seo", "label": "SEO", "share": 0.4 }
+  ],
+  "knowledge": { "hook": [], "script": [], "humanizer": [] },
+  "platforms": { "instagram": { "max_slides": 20 }, "linkedin": { "max_slides": 20 } }
+}
