@@ -16,7 +16,9 @@ const PHONE = /(?:\+62|\b08)[\s-]?\d(?:[\s-]?\d){7,}/g;
 
 test("no real email addresses in tracked files", () => {
   const bad = [];
-  for (const [f, s] of files) for (const m of s.matchAll(EMAIL)) if (m[1].toLowerCase() !== "example.com") bad.push(`${f}: ${m[0]}`);
+  // the commit trailer address quoted in the plan docs is not a real contact
+  const OK = new Set(["noreply@anthropic.com"]);
+  for (const [f, s] of files) for (const m of s.matchAll(EMAIL)) if (m[1].toLowerCase() !== "example.com" && !OK.has(m[0].toLowerCase())) bad.push(`${f}: ${m[0]}`);
   assert.deepEqual(bad, []);
 });
 
