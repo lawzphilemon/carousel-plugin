@@ -1,5 +1,3 @@
-import path from "node:path";
-
 const ORDER = ["code", "topic", "status", "scheduled_at", "account", "repliz_id", "folder"];
 
 export function buildSheetRow(meta, brand, projectDir) {
@@ -7,6 +5,8 @@ export function buildSheetRow(meta, brand, projectDir) {
   if (!t) return { tracked: false };
   if (meta.status !== "scheduled") throw new Error(`project status must be scheduled, got ${meta.status}`);
   if (!meta.repliz?.schedule_id) throw new Error("meta.repliz.schedule_id is missing");
+  if (!meta.brand) throw new Error("meta.brand is missing");
+  if (!t.columns || typeof t.columns !== "object") throw new Error("tracking.columns is missing");
   const src = {
     code: meta.code,
     topic: meta.topic,
@@ -14,17 +14,19 @@ export function buildSheetRow(meta, brand, projectDir) {
     scheduled_at: meta.repliz.schedule_at,
     account: meta.repliz.account,
     repliz_id: meta.repliz.schedule_id,
-    folder: `${meta.brand}/${path.basename(projectDir)}`,
+    folder: `${meta.brand}/${String(projectDir).replaceAll("\\", "/").split("/").filter(Boolean).pop()}`,
   };
   const keys = ORDER.filter((k) => t.columns[k]);
   const cells = {};
   for (const k of keys) cells[t.columns[k]] = src[k] == null ? "" : String(src[k]);
   const by = t.match_by ?? "code";
+  const topic = String(meta.topic ?? "").trim();
+  if (by === "topic" && !topic) throw new Error("topic is empty: cannot match a sheet row by topic");
   return {
     tracked: true,
     expected_headers: keys.map((k) => t.columns[k]),
     cells,
-    match: { column: t.match_column, by, value: by === "topic" ? String(meta.topic).trim() : meta.code },
+    match: { column: t.match_column, by, value: by === "topic" ? topic : meta.code },
   };
 }
 

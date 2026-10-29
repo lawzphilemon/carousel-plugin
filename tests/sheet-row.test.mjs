@@ -78,3 +78,25 @@ test("rowToCsv round-trips awkward fields", () => {
 test("rowToCsv refuses untracked row", () => {
   assert.throws(() => rowToCsv({ tracked: false }), /nothing to export: row is not tracked/);
 });
+
+test("topic match rejects empty topics, code match still works", () => {
+  const b = brand(); b.tracking.match_by = "topic"; b.tracking.match_column = "Topic";
+  for (const topic of [undefined, null, "   "]) {
+    const m = { ...meta(), topic };
+    assert.throws(() => buildSheetRow(m, b, dir), /topic is empty: cannot match a sheet row by topic/);
+    assert.equal(buildSheetRow(m, brand(), dir).match.value, "CAR-261030-A1B2");
+  }
+});
+
+test("missing brand or columns throw clear errors", () => {
+  const m = meta(); delete m.brand;
+  assert.throws(() => buildSheetRow(m, brand(), dir), /meta\.brand is missing/);
+  const b = brand(); delete b.tracking.columns;
+  assert.throws(() => buildSheetRow(meta(), b, dir), /tracking\.columns is missing/);
+});
+
+test("folder handles trailing slash and backslashes", () => {
+  const want = "acme/CAR-261030-A1B2_three-numbers";
+  assert.equal(buildSheetRow(meta(), brand(), dir + "/").cells.Folder, want);
+  assert.equal(buildSheetRow(meta(), brand(), String.raw`C:\out\acme\CAR-261030-A1B2_three-numbers` + "\\").cells.Folder, want);
+});
