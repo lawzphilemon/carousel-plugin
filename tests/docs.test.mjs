@@ -35,7 +35,7 @@ test("every engine invocation names a real command and real flags", () => {
     }
   }
   assert.ok(agentFiles.length > 0, "agents/ has no .md files");
-  assert.ok(seen >= 14,`only ${seen} invocations found`);
+  assert.ok(seen >= 14, `only ${seen} invocations found`);
 });
 
 test("every FLAGS entry is accepted by the parser", () => {
@@ -81,8 +81,10 @@ test("carousel agent: front matter, statuses, sources, no questions", () => {
   assert.match(fm, /^name: carousel$/m);
   assert.match(fm, /^description: .+/m);
   assert.doesNotMatch(fm, /^tools:/m);
-  for (const w of ["NEEDS_INPUT", "REVIEW", "BLOCKED", "REFUSED", "PUBLISHED", "APPROVED:", "sheet-row", "commands/make.md", "commands/publish.md", "formula", "starts with `=`"])assert.ok(s.includes(w), `missing ${w}`);
+  for (const w of ["NEEDS_INPUT", "REVIEW", "BLOCKED", "REFUSED", "PUBLISHED", "APPROVED:", "sheet-row", "commands/make.md", "commands/publish.md", "formula", "starts with `=`",
+    "Never change the approved", "--tracked skipped", "accounts_available", "brand's timezone", "cannot be revised"]) assert.ok(s.includes(w), `missing ${w}`);
+  assert.match(s, /status is `scheduled` cannot be revised/);
   assert.ok(!s.includes("AskUserQuestion"), "agent must not ask the user");
-  const i = (w) => s.indexOf(w);
-  assert.ok(i("NEEDS_INPUT") < i("STATUS: REVIEW") && i("STATUS: REVIEW") < i("APPROVED:"), "section order: input check, review, publish");
+  const order = ["STATUS: NEEDS_INPUT", "STATUS: REVIEW", "APPROVED: <code> account:"].map((w) => s.indexOf(w));
+  assert.ok(order.every((n) => n >= 0) && order[0] < order[1] && order[1] < order[2], "section order: input check, review, publish");
 });
