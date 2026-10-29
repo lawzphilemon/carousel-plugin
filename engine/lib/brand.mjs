@@ -85,5 +85,39 @@ export function validateBrand(brand, dir) {
   for (const [key, rel] of files) {
     if (typeof rel !== "string" || !rel || !existsSync(join(dir, rel))) errors.push(`${key}: file not found: ${rel}`);
   }
+  if (brand.tracking !== undefined) validateTracking(brand.tracking, errors);
   return errors;
+}
+
+const nonEmpty = (v) => typeof v === "string" && v.trim() !== "";
+
+function validateTracking(t, errors) {
+  if (!t || typeof t !== "object" || Array.isArray(t)) return void errors.push("tracking: must be an object");
+  for (const k of ["sheet_id", "tab", "match_column"]) {
+    if (!nonEmpty(t[k])) errors.push(`tracking.${k}: must be a non-empty string`);
+  }
+  if (t.mode !== "append" && t.mode !== "update") errors.push(`tracking.mode: must be "append" or "update"`);
+  const by = t.match_by ?? "code";
+  if (by !== "code" && by !== "topic") errors.push(`tracking.match_by: must be "code" or "topic"`);
+  const cols = t.columns;
+  if (!cols || typeof cols !== "object" || Array.isArray(cols)) {
+    errors.push("tracking.columns: must be an object");
+  } else {
+    for (const k of ["code", "status", "scheduled_at"]) {
+      if (!nonEmpty(cols[k])) errors.push(`tracking.columns.${k}: required, must be a non-empty string`);
+    }
+    const seen = new Map();
+    for (const [k, v] of Object.entries(cols)) {
+      if (!nonEmpty(v)) { if (cols[k] !== undefined) errors.push(`tracking.columns.${k}: must be a non-empty string`); continue; }
+      if (seen.has(v)) errors.push(`tracking.columns: header "${v}" is mapped twice (${seen.get(v)}, ${k})`);
+      else seen.set(v, k);
+    }
+    if (by === "topic" && !nonEmpty(cols.topic)) {
+      errors.push(`tracking.match_by: "${by}" needs columns.${by}`);
+    }
+    if (nonEmpty(t.match_column) && !seen.has(t.match_column)) {
+      errors.push(`tracking.match_column: "${t.match_column}" is not one of the mapped columns`);
+    }
+  }
+  if (!nonEmpty(t.status_values?.scheduled)) errors.push("tracking.status_values.scheduled: must be a non-empty string");
 }

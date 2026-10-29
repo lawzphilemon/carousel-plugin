@@ -92,3 +92,33 @@ test("cta.button bg and fg must be #RRGGBB", () => {
     assert.ok(validateBrand(b, dir).some((e) => e.includes(`cta.button.${k}`)), k);
   }
 });
+
+test("tracking is optional", () => {
+  const { brand, dir } = loadBrand(acmePath);
+  delete brand.tracking;
+  assert.deepEqual(validateBrand(brand, dir), []);
+});
+
+test("tracking not an object", () => {
+  const { brand, dir } = loadBrand(acmePath);
+  brand.tracking = "x";
+  assert.deepEqual(validateBrand(brand, dir), ["tracking: must be an object"]);
+});
+
+const trackingCases = [
+  ["tracking.mode", (t) => { t.mode = "sync"; }],
+  ["tracking.columns.status", (t) => { delete t.columns.status; }],
+  ["mapped twice", (t) => { t.columns.topic = t.columns.code; }],
+  ["tracking.match_column", (t) => { t.match_column = "Nope"; }],
+  ["tracking.match_by", (t) => { t.match_by = "topic"; delete t.columns.topic; }],
+  ["tracking.status_values.scheduled", (t) => { t.status_values = {}; }],
+  ["tracking.tab", (t) => { t.tab = ""; }],
+];
+for (const [text, mutate] of trackingCases) {
+  test(`tracking error: ${text}`, () => {
+    const { brand, dir } = loadBrand(acmePath);
+    mutate(brand.tracking);
+    const errs = validateBrand(brand, dir);
+    assert.ok(errs.some((e) => e.includes(text)), errs.join("\n"));
+  });
+}

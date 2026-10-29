@@ -65,5 +65,18 @@
     { "id": "seo", "label": "SEO", "share": 0.4 }
   ],
   "knowledge": { "hook": [], "script": [], "humanizer": [] },
-  "platforms": { "instagram": { "max_slides": 20 }, "linkedin": { "max_slides": 20 } }
+  "platforms": { "instagram": { "max_slides": 20 }, "linkedin": { "max_slides": 20 } },
+  "tracking": {
+    "sheet_id": "EXAMPLE_SHEET_ID",
+    "tab": "Acme",
+    "mode": "append",
+    "match_column": "Code",
+    "match_by": "code",
+    "columns": {
+      "code": "Code", "topic": "Topic", "status": "Status",
+      "scheduled_at": "Scheduled", "account": "Account",
+      "repliz_id": "Repliz ID", "folder": "Folder"
+    },
+    "status_values": { "scheduled": "Scheduled (draft)" }
+  }
 }
