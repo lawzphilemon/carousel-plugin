@@ -8,9 +8,10 @@ import { runVisual } from "./lib/lint-visual.mjs";
 import { renderProject } from "./render.mjs";
 import { createProject, readMeta, updateMeta } from "./lib/project.mjs";
 import { resolveKnowledge } from "./lib/knowledge.mjs";
+import { buildSheetRow, rowToCsv } from "./lib/sheet-row.mjs";
 import { precheck, buildSchedulePayload, toUtcIso, checkStagger } from "./lib/publish.mjs";
 
-export const COMMANDS = ["lint", "render", "new", "knowledge", "publish-payload", "status", "meta"];
+export const COMMANDS = ["lint", "render", "new", "knowledge", "publish-payload", "status", "meta", "sheet-row"];
 
 // keep in sync with the parser specs in handlers; tests/docs.test.mjs checks each flag is accepted
 export const FLAGS = {
@@ -20,7 +21,8 @@ export const FLAGS = {
   knowledge: ["brand", "installed"],
   "publish-payload": ["project", "brands", "account", "at", "live", "existing"],
   status: ["project"],
-  meta: ["project", "status", "account", "schedule-id", "schedule-at"],
+  meta: ["project", "status", "account", "schedule-id", "schedule-at", "tracked"],
+  "sheet-row": ["project", "brands"],
 };
 
 class Usage extends Error {}
@@ -138,7 +140,7 @@ const handlers = {
   },
 
   meta(args) {
-    const f = parse(args, { project: "value", status: "value", account: "value", "schedule-id": "value", "schedule-at": "value" }, ["project"]);
+    const f = parse(args, { project: "value", status: "value", account: "value", "schedule-id": "value", "schedule-at": "value", tracked: "value" }, ["project"]);
     needProject(f.project);
     if (f["schedule-at"] !== undefined && (!ISO_UTC.test(f["schedule-at"]) || Number.isNaN(Date.parse(f["schedule-at"])) || new Date(f["schedule-at"]).toISOString().slice(0, 19) !== f["schedule-at"].slice(0, 19))) throw new Error(`--schedule-at must be ISO 8601 UTC, e.g. 2026-11-03T04:00:00Z: ${f["schedule-at"]}`);
     const patch = {};
@@ -155,9 +157,25 @@ const handlers = {
     if (f["schedule-id"] !== undefined) repliz.schedule_id = f["schedule-id"];
     if (f["schedule-at"] !== undefined) repliz.schedule_at = f["schedule-at"];
     if (Object.keys(repliz).length) patch.repliz = repliz;
-    if (!Object.keys(patch).length) throw new Usage("meta needs at least one of --status, --account, --schedule-id, --schedule-at");
+    if (f.tracked !== undefined) {
+      if (!["written", "csv", "skipped"].includes(f.tracked)) throw new Error("--tracked must be written, csv or skipped");
+      patch.tracking = { state: f.tracked, at: new Date().toISOString() };
+    }
+    if (!Object.keys(patch).length) throw new Usage("meta needs at least one of --status, --account, --schedule-id, --schedule-at, --tracked");
     const meta = updateMeta(f.project, patch);
     return res(0, meta, `${meta.code}: ${meta.status}`);
+  },
+
+  "sheet-row"(args) {
+    const f = parse(args, { project: "value", brands: "value" }, ["project", "brands"]);
+    needProject(f.project);
+    const meta = readMeta(f.project);
+    const { brand, dir } = loadBrand(brandPath(f.brands, meta.brand));
+    const errors = validateBrand(brand, dir);
+    if (errors.length) return res(1, { ok: false, errors }, `brand invalid: ${errors.length} error(s)`);
+    const row = buildSheetRow(meta, brand, f.project);
+    if (row.tracked) writeFileSync(join(f.project, "sheet-row.csv"), rowToCsv(row));
+    return res(0, row, row.tracked ? "sheet row ready" : "brand has no tracking");
   },
 
   status(args) {

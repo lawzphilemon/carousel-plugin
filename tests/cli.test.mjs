@@ -7,6 +7,8 @@ import { spawnSync } from "node:child_process";
 import { COMMANDS, run } from "../engine/cli.mjs";
 import { findChrome } from "../engine/lib/chrome.mjs";
 import { updateMeta } from "../engine/lib/project.mjs";
+import { rowToCsv } from "../engine/lib/sheet-row.mjs";
+import { FLAGS } from "../engine/cli.mjs";
 
 let chrome = null;
 try { chrome = findChrome(); } catch { /* skipped below */ }
@@ -27,7 +29,8 @@ const mk = (status = "draft", mutate) => {
 const lint = (dir) => run(["lint", "--stage", "text", "--project", dir, "--brands", "examples"]);
 
 test("COMMANDS", () => {
-  assert.deepEqual(COMMANDS, ["lint", "render", "new", "knowledge", "publish-payload", "status", "meta"]);
+  assert.deepEqual(COMMANDS, ["lint", "render", "new", "knowledge", "publish-payload", "status", "meta", "sheet-row"]);
+  assert.ok(FLAGS.meta.includes("tracked"));
 });
 
 test("unknown command and missing flag exit 2", () => {
@@ -356,4 +359,68 @@ test("meta rejects calendar-invalid --schedule-at", () => {
     assert.equal(run(["meta", "--project", dir, "--schedule-at", v]).code, 1, v);
   }
   assert.equal(run(["meta", "--project", dir, "--schedule-at", "2026-02-28T03:00:00Z"]).code, 0);
+});
+
+const sched = () => {
+  const dir = mk("scheduled");
+  updateMeta(dir, { repliz: { account: "acct1", schedule_id: "s9", schedule_at: "2026-11-03T04:00:00Z" } });
+  return dir;
+};
+const sr = (dir, brands = "examples") => run(["sheet-row", "--project", dir, "--brands", brands]);
+
+test("sheet-row writes JSON and CSV for a tracked scheduled project", () => {
+  const dir = sched();
+  const r = sr(dir);
+  assert.equal(r.code, 0, r.stderr);
+  const row = out(r);
+  assert.equal(row.tracked, true);
+  assert.equal(row.cells.Code, JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")).code);
+  const csv = fs.readFileSync(path.join(dir, "sheet-row.csv"), "utf8");
+  assert.equal(csv, rowToCsv(row));
+  assert.ok(csv.startsWith(row.expected_headers.join(",")));
+});
+
+test("sheet-row refuses a draft project", () => {
+  const r = sr(mk());
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /scheduled/);
+});
+
+test("sheet-row with an untracked brand prints tracked:false and writes nothing", () => {
+  const brands = tmp();
+  fs.cpSync("examples/acme", path.join(brands, "acme"), { recursive: true });
+  const bp = path.join(brands, "acme", "brand.json");
+  const b = JSON.parse(fs.readFileSync(bp, "utf8"));
+  delete b.tracking;
+  fs.writeFileSync(bp, JSON.stringify(b));
+  const dir = sched();
+  const r = sr(dir, brands);
+  assert.equal(r.code, 0, r.stderr);
+  assert.deepEqual(out(r), { tracked: false });
+  assert.equal(fs.existsSync(path.join(dir, "sheet-row.csv")), false);
+});
+
+test("sheet-row invalid brand exits 1, missing --brands exits 2", () => {
+  const brands = tmp();
+  fs.cpSync("examples/acme", path.join(brands, "acme"), { recursive: true });
+  const bp = path.join(brands, "acme", "brand.json");
+  const b = JSON.parse(fs.readFileSync(bp, "utf8"));
+  b.tracking.match_by = "nope";
+  fs.writeFileSync(bp, JSON.stringify(b));
+  assert.equal(sr(sched(), brands).code, 1);
+  assert.equal(run(["sheet-row", "--project", sched()]).code, 2);
+});
+
+test("meta --tracked stores state and time", () => {
+  const dir = mk();
+  const m = (v) => run(["meta", "--project", dir, "--tracked", v]);
+  const r = m("written");
+  assert.equal(r.code, 0, r.stderr);
+  const t = out(r).tracking;
+  assert.equal(t.state, "written");
+  assert.ok(!Number.isNaN(Date.parse(t.at)));
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")).tracking.state, "written");
+  const bad = m("maybe");
+  assert.equal(bad.code, 1);
+  assert.match(bad.stderr, /--tracked must be written, csv or skipped/);
 });
