@@ -106,6 +106,8 @@ function validateTracking(t, errors) {
     for (const k of ["code", "status", "scheduled_at"]) {
       if (!nonEmpty(cols[k])) errors.push(`tracking.columns.${k}: required, must be a non-empty string`);
     }
+    const allowed = ["code", "topic", "status", "scheduled_at", "account", "repliz_id", "folder"];
+    for (const k of Object.keys(cols)) if (!allowed.includes(k)) errors.push(`tracking.columns.${k}: unknown column key`);
     const seen = new Map();
     for (const [k, v] of Object.entries(cols)) {
       if (!nonEmpty(v)) { if (cols[k] !== undefined) errors.push(`tracking.columns.${k}: must be a non-empty string`); continue; }
@@ -117,6 +119,8 @@ function validateTracking(t, errors) {
     }
     if (nonEmpty(t.match_column) && !seen.has(t.match_column)) {
       errors.push(`tracking.match_column: "${t.match_column}" is not one of the mapped columns`);
+    } else if (nonEmpty(t.match_column) && nonEmpty(cols[by]) && t.match_column !== cols[by]) {
+      errors.push(`tracking.match_column: must equal the header mapped to match_by "${by}"`);
     }
   }
   if (!nonEmpty(t.status_values?.scheduled)) errors.push("tracking.status_values.scheduled: must be a non-empty string");

@@ -15,7 +15,7 @@ The schema is the one in `examples/acme/brand.json` inside this plugin. Read it 
 Ask which one:
 
 1. **Interview.** Ask in small groups, not all at once: name, handle, language, platforms; palette (dark, light, accent, text colors, forbidden colors); font family and font file; logo files per background (on dark, on light, on accent); voice (point of view, how to address the reader per platform, words to use and avoid, emoji limit); hard rules (prices, claims needing a source, client names to block); standard CTA lines per pillar; content pillars; timezone; optional knowledge skills per role (hook, script, humanizer); optional Google Sheet tracking (see below).
-2. **Import.** The user points at a brand guideline PDF or document. Read it yourself. The engine never parses documents.
+2. **Import.** The user points at a brand guideline PDF or document. Read it yourself. The engine never parses documents. After the import, still ask the tracking questions below; if the user declines, say tracking is skipped.
 
 ### Sheet tracking (optional)
 
@@ -27,7 +27,7 @@ Ask whether finished carousels should be logged in a Google Sheet. If not, leave
 - the column header names, exactly as in row 1 of the tab: code, topic, status, scheduled_at (required: code, status, scheduled_at), then optionally account, repliz_id, folder;
 - the status text written when a carousel is scheduled (`status_values.scheduled`).
 
-Remind the user that the sheet must be shared as **Editor** with the Google account connected to Claude. Check the tab with the Sheets tools. If the tab or its header row is missing, offer to create it, but only after the user agrees, and first show exactly what will be written: the tab name and the header row. If the user declines, save the config anyway and note that the tab is missing, so the first tracking run falls back to `sheet-row.csv`.
+Remind the user that the sheet must be shared as **Editor** with the Google account connected to Claude. Check the tab with the Sheets tools. If the tab exists but its header row is partial (some expected headers missing), offer to add ONLY the missing headers to the right of the existing ones, after showing exactly what will be written and getting agreement; otherwise note the mismatch and save the config. If the tab or its header row is missing, offer to create it, but only after the user agrees, and first show exactly what will be written: the tab name and the header row. If the user declines, save the config anyway and note that the tab is missing, so the first tracking run falls back to `sheet-row.csv`.
 
 ## 2. Propose, then confirm
 

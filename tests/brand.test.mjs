@@ -111,6 +111,8 @@ const trackingCases = [
   ["mapped twice", (t) => { t.columns.topic = t.columns.code; }],
   ["tracking.match_column", (t) => { t.match_column = "Nope"; }],
   ["tracking.match_by", (t) => { t.match_by = "topic"; delete t.columns.topic; }],
+  ["must equal the header mapped to match_by", (t) => { t.match_column = t.columns.topic; }],
+  ["tracking.columns.bogus: unknown column key", (t) => { t.columns.bogus = "Bogus"; }],
   ["tracking.status_values.scheduled", (t) => { t.status_values = {}; }],
   ["tracking.tab", (t) => { t.tab = ""; }],
 ];

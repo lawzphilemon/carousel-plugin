@@ -84,6 +84,7 @@ test("carousel agent: front matter, statuses, sources, no questions", () => {
   for (const w of ["NEEDS_INPUT", "REVIEW", "BLOCKED", "REFUSED", "PUBLISHED", "APPROVED:", "sheet-row", "commands/make.md", "commands/publish.md", "formula", "starts with `=`",
     "Never change the approved", "--tracked skipped", "accounts_available", "brand's timezone", "cannot be revised"]) assert.ok(s.includes(w), `missing ${w}`);
   assert.match(s, /status is `scheduled` cannot be revised/);
+  assert.ok(s.includes("verbatim") && s.includes("never compose"), "approval provenance missing");
   assert.ok(!s.includes("AskUserQuestion"), "agent must not ask the user");
   const order = ["STATUS: NEEDS_INPUT", "STATUS: REVIEW", "APPROVED: <code> account:"].map((w) => s.indexOf(w));
   assert.ok(order.every((n) => n >= 0) && order[0] < order[1] && order[1] < order[2], "section order: input check, review, publish");

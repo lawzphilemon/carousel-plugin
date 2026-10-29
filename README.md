@@ -94,7 +94,7 @@ There are two stops:
 APPROVED: CAR-261030-A1B2 account: <id> at: 2026-11-03 11:00 live: false
 ```
 
-A carousel without a valid line is left untouched and reported `REFUSED`. Statuses: `NEEDS_INPUT`, `REVIEW`, `BLOCKED` (per carousel, with the reason), `REFUSED`, `PUBLISHED`. A draft still needs a manual publish in Repliz.
+The caller must pass your own `APPROVED:` lines verbatim. It must never compose them, fill in an account or time for you, or turn a vague "yes, publish" into one; if you answered loosely, it asks you for the missing account, date and time instead of dispatching. The `accounts_available` list is for you to choose from, not for the caller. A carousel without a valid line is left untouched and reported `REFUSED`. Statuses: `NEEDS_INPUT`, `REVIEW`, `BLOCKED` (per carousel, with the reason), `REFUSED`, `PUBLISHED`. A draft still needs a manual publish in Repliz.
 
 The agent locates the plugin files through `${CLAUDE_PLUGIN_ROOT}`; if that is not substituted inside the agent, it falls back to finding them with Glob. This variant is unverified until the release checklist has been run.
 
@@ -141,6 +141,9 @@ Run it from the repo root. `node --test tests/` fails on Windows with Node 24; u
 - Long copy is not shrunk automatically. Lint flags overflow and you shorten the text.
 - Platform slide limits live in `brand.json` and change over time. Check them against the platform.
 - The contrast rule is 4.5:1 for all text.
+- Sheet tracking writes the same status text (`status_values.scheduled`, for example "Scheduled (draft)") for draft and live posts; word it neutrally if you publish live.
+- `sheet-row.csv` is not formula-neutralized: formula-like text in a topic stays raw if the CSV is opened in a spreadsheet app. The apostrophe rule applies to the direct Sheets writes only.
+- Manual `/carousel:publish` may prompt for permission on the Sheets tool calls, because the Sheets tools are not pre-approved.
 
 ## Privacy
 

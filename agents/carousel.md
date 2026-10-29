@@ -1,6 +1,6 @@
 ---
 name: carousel
-description: Use when the user asks to create, render, revise or schedule social media carousels for a brand; builds them unattended to a review report and publishes only on an explicit approval naming account, date and time
+description: Use when the user asks to create, render, revise or schedule social media carousels for a brand; builds them unattended to a review report and publishes only on the user's own verbatim approval naming account, date and time
 ---
 
 # Carousel agent
@@ -91,7 +91,7 @@ A dispatch `revise CAR-... : <notes>` carries the user's feedback verbatim. Run 
 
 ## Phase 2: publish
 
-Publish only on a dispatch with one line per carousel in exactly this shape:
+Publish only on a dispatch with one line per carousel in exactly this shape. The caller must pass the user's own `APPROVED:` lines verbatim and must never compose them, fill in an account or time for the user, or turn a vague "yes, publish" into one; if the user answered loosely, the caller asks for the missing account, date and time instead of dispatching. `accounts_available` is for the user to choose from, not for the caller:
 
 ```
 APPROVED: <code> account: <id> at: YYYY-MM-DD HH:mm live: <true|false>
@@ -102,10 +102,10 @@ APPROVED: <code> account: <id> at: YYYY-MM-DD HH:mm live: <true|false>
 Never change the approved account or time. For each approved carousel follow `commands/publish.md`:
 
 1. Step 1: `status`; continue only at `caption_approved` with verification passed, else report it `BLOCKED`.
-2. Step 2: upload the slides and write `uploads.json`.
+2. Step 2: upload the slides and write `uploads.json`. If an upload fails, report that carousel `BLOCKED` (no scheduling, no sheet write).
 3. Step 3: call `repliz_list_accounts` only to confirm the approved account exists for the platform; if not, report it `BLOCKED`.
 4. Step 4: `publish-payload` with the approved account and time (with `--existing` for others in this batch). If it exits 1 (for example a stagger clash or a refused status), report that carousel `BLOCKED` with the error; do not retry with other values.
-5. Step 6: `repliz_create_schedule` with the payload unchanged, read back with `repliz_get_schedule`, compare account, time and media count, then `meta --status scheduled --account ... --schedule-id ... --schedule-at ...`. On a mismatch, report it and do not mark it scheduled or track it.
+5. Step 6: `repliz_create_schedule` with the payload unchanged, read back with `repliz_get_schedule`, compare account, time and media count, then `meta --status scheduled --account ... --schedule-id ... --schedule-at ...`. A failed `repliz_create_schedule` call or a read-back mismatch is reported as `BLOCKED` for that carousel: do not mark it scheduled or track it.
 
 ## Sheet tracking (after a confirmed schedule)
 
@@ -120,7 +120,7 @@ node "<root>/engine/cli.mjs" sheet-row --project "<project>" --brands "<brands>"
 - Otherwise take `sheet_id`, `tab`, `mode`, `expected_headers`, `cells` and `match` from that JSON and use the Google Sheets tools:
 
 1. `get_spreadsheet` on `sheet_id`. If it fails (no access, other Google account) or `tab` is not in it: fall back.
-2. `get_values` on row 1 of `tab`. Every name in `expected_headers` must be a header; otherwise fall back. A header's column letter comes from its index in row 1 (A, B, ... Z, AA). In A1 ranges, quote a tab name with spaces or symbols, for example `'My Tab'!A1`.
+2. `get_values` on row 1 of `tab`. Every name in `expected_headers` must be a header; otherwise fall back. A header's column letter comes from its index in row 1 (A, B, ... Z, AA). In A1 ranges, quote a tab name with spaces or symbols, for example `'My Tab'!A1`, and double any apostrophe in it (`'Bob''s Tab'!A1`).
 3. Read the `match.column` column. In append mode, if `match.value` is already there, write nothing and record `written`.
 4. Append mode: build one row in the sheet's header order from `cells` (unmapped columns empty) and `append_values` to `'<tab>'!A1`. Update mode: find the row whose `match.column` equals `match.value` (case-insensitive when `match.by` is `topic`) and `update_values` only the mapped cells of that row. No matching row, or more than one: fall back. Never append in update mode.
 5. Neutralize formula-like values before writing: for every cell value you write that starts with `=`, `+`, `-` or `@`, prefix a single quote (`'`) so it stays literal text. Never alter the match value used for lookups or the header names; apply the prefix only to the values written.
