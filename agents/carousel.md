@@ -80,7 +80,7 @@ CAROUSELS:
 
 ## Revisions
 
-A dispatch `revise CAR-... : <notes>` carries the user's feedback verbatim. Run `status` for that carousel, edit `copy.json` and `caption.txt` per the notes, and re-run Phase 1 from step 3 (text lint) for it; `render` is allowed from `copy_approved`, `rendered` or `caption_approved` and resets the status to `rendered`. The evidence rule and the fix limit still apply. Return a new `STATUS: REVIEW` report for that carousel only.
+A dispatch `revise CAR-... : <notes>` carries the user's feedback verbatim. Run `status` for that carousel, edit `copy.json` and `caption.txt` per the notes, and re-run Phase 1 from its item 3 (text lint, make.md step 4) for it; `render` is allowed from `copy_approved`, `rendered` or `caption_approved` and resets the status to `rendered`. The evidence rule and the fix limit still apply. Return a new `STATUS: REVIEW` report for that carousel only.
 
 ## Phase 2: publish
 
@@ -108,13 +108,13 @@ Run only after `meta.status` is `scheduled`. Tracking never blocks or undoes a s
 node "<root>/engine/cli.mjs" sheet-row --project "<project>" --brands "<brands>"
 ```
 
-If it prints `tracked: false`, the brand has no `tracking`: skip silently. Otherwise take `sheet_id`, `tab` and `mode` from the `tracking` block of `<brands>/<slug>/brand.json`, and `expected_headers`, `cells` and `match` from the output. With the Google Sheets tools:
+If it prints `tracked: false`, the brand has no `tracking`: skip silently. Otherwise take `sheet_id`, `tab`, `mode`, `expected_headers`, `cells` and `match` from that JSON. With the Google Sheets tools:
 
 1. `get_spreadsheet` on `sheet_id`. It fails (no access, other Google account): fall back.
 2. Confirm `tab` exists, then `get_values` on row 1 of that tab. Every name in `expected_headers` must be a header; otherwise fall back.
 3. Read the `match.column` column. In append mode, if `match.value` is already there, write nothing and record `written`.
 4. Append mode: build one row in the sheet's header order from `cells` (unmapped columns empty) and `append_values` to that tab only. Update mode: find the row whose `match.column` equals `match.value` (case-insensitive when `match.by` is `topic`) and `update_values` only the mapped cells of that row. No matching row: fall back. Never append in update mode.
-5. Write values as text: use RAW value input. If the tool cannot set RAW, prefix a single quote (`'`) to the Topic and Folder cells only, never to the match value.
+5. Neutralize formula-like values before writing: for every cell value you write that starts with `=`, `+`, `-` or `@`, prefix a single quote (`'`) so it stays literal text. Never alter the match value used for lookups or the header names; apply the prefix only to the values written.
 6. Never read or write any other tab or sheet. Do not retry in a loop.
 
 On success run `meta --project "<project>" --tracked written`. On any failure keep `sheet-row.csv` (already written by `sheet-row`), run `meta --project "<project>" --tracked csv`, and report the brand, sheet, tab and why it failed.

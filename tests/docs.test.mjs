@@ -81,7 +81,7 @@ test("carousel agent: front matter, statuses, sources, no questions", () => {
   assert.match(fm, /^name: carousel$/m);
   assert.match(fm, /^description: .+/m);
   assert.doesNotMatch(fm, /^tools:/m);
-  for (const w of ["NEEDS_INPUT", "REVIEW", "BLOCKED", "REFUSED", "PUBLISHED", "APPROVED:", "sheet-row", "commands/make.md", "commands/publish.md", "RAW"]) assert.ok(s.includes(w), `missing ${w}`);
+  for (const w of ["NEEDS_INPUT", "REVIEW", "BLOCKED", "REFUSED", "PUBLISHED", "APPROVED:", "sheet-row", "commands/make.md", "commands/publish.md", "formula", "starts with `=`"])assert.ok(s.includes(w), `missing ${w}`);
   assert.ok(!s.includes("AskUserQuestion"), "agent must not ask the user");
   const i = (w) => s.indexOf(w);
   assert.ok(i("NEEDS_INPUT") < i("STATUS: REVIEW") && i("STATUS: REVIEW") < i("APPROVED:"), "section order: input check, review, publish");
