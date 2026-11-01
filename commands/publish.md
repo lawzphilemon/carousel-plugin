@@ -56,6 +56,8 @@ Then update `meta.json` only through the `meta` command, never by hand:
 node "${CLAUDE_PLUGIN_ROOT}/engine/cli.mjs" meta --project "<project>" --status scheduled --account "<account id>" --schedule-id "<id>" --schedule-at "<UTC ISO time>"
 ```
 
+Add `--live` when this carousel was scheduled live, so the sheet row gets the brand's live status text.
+
 ## 7. Track in the sheet
 
 Run only after the read-back matched and `meta --status scheduled` was recorded. Tracking never blocks, changes or undoes a schedule. A brand without `tracking` skips this step silently.

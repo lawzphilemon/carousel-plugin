@@ -25,7 +25,7 @@ Ask whether finished carousels should be logged in a Google Sheet. If not, leave
 - `mode`: `append` (add a row per carousel) or `update` (fill a row that already exists, never append);
 - `match_column` (the header used to find or de-duplicate a row) and `match_by` (`code` or `topic`);
 - the column header names, exactly as in row 1 of the tab: code, topic, status, scheduled_at (required: code, status, scheduled_at), then optionally account, repliz_id, folder;
-- the status text written when a carousel is scheduled (`status_values.scheduled`).
+- the status text written when a carousel is scheduled as a draft (`status_values.scheduled`), and optionally a different one for a live post (`status_values.scheduled_live`; without it live posts get the draft text too).
 
 Remind the user that the sheet must be shared as **Editor** with the Google account connected to Claude. Check the tab with the Sheets tools. If the tab exists but its header row is partial (some expected headers missing), offer to add ONLY the missing headers to the right of the existing ones, after showing exactly what will be written and getting agreement; otherwise note the mismatch and save the config. If the tab or its header row is missing, offer to create it, but only after the user agrees, and first show exactly what will be written: the tab name and the header row. If the user declines, save the config anyway and note that the tab is missing, so the first tracking run falls back to `sheet-row.csv`.
 

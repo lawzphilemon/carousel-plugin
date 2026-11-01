@@ -10,7 +10,7 @@ export function buildSheetRow(meta, brand, projectDir) {
   const src = {
     code: meta.code,
     topic: meta.topic,
-    status: t.status_values.scheduled,
+    status: (meta.repliz.live && t.status_values.scheduled_live) || t.status_values.scheduled,
     scheduled_at: meta.repliz.schedule_at,
     account: meta.repliz.account,
     repliz_id: meta.repliz.schedule_id,

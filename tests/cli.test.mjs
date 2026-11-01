@@ -143,6 +143,7 @@ test("meta command", () => {
   assert.equal(r.code, 0);
   const meta = out(r);
   assert.deepEqual(meta.repliz, { account: "a1", schedule_id: "s1", schedule_at: "2026-11-03T00:30:00.000Z" });
+  assert.equal(out(m("--live")).repliz.live, true);
   assert.equal(m("--schedule-id", "s2").code, 0);
   assert.equal(out(m("--account", "a1")).repliz.schedule_id, "s2");
   assert.equal(JSON.parse(fs.readFileSync(path.join(dir, "meta.json"), "utf8")).brand, "acme");
