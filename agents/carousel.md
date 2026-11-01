@@ -75,12 +75,12 @@ List only the missing names from: `brand`, `topic`, `count`, `cta_contact`, `sou
 For each of the `count` carousels, in this order (steps of `commands/make.md`):
 
 1. Context (step 1): load the `carousel-craft` skill for the writing rules.
-2. Knowledge (step 2): run `knowledge` with the skills actually available in this session; use `use` and the bundled fallback as the command says.
-3. Copy (step 3): pick angles that avoid what carousel-scout found in `<out>` (ask it once per batch, together with the source checks), then `new`, then write `copy.json` with the dispatch's `cta_contact` on the `cta` slide.
-4. Text lint (step 4): `lint --stage text` until exit 0.
+2. Knowledge (step 2): run `knowledge` with the skills actually available in this session, by their full names as listed (for example `plugin:skill`). **Every skill in a role's `use` is required, not optional:** invoke it with the Skill tool at its moment below; reading its name is not using it. The bundled `carousel-craft` guide replaces a role only when that role's `fallback` is true. A skill in `use` that you did not invoke is a mistake: note it in the report under `assumptions`.
+3. Copy (step 3): pick angles that avoid what carousel-scout found in `<out>` (ask it once per batch, together with the source checks), then `new`. Invoke each `script` skill in `use` to shape the slide story and each `hook` skill in `use` for the cover hook options and their audit, then write `copy.json` with the dispatch's `cta_contact` on the `cta` slide.
+4. Text lint (step 4): invoke each `humanizer` skill in `use` on the slide copy, then `lint --stage text` until exit 0.
 5. Step 5: `meta --status copy_approved`, then `render`.
 6. Visual lint (step 6): `lint --stage visual`; after each copy fix run text lint and render again.
-7. Caption (step 7): write `caption.txt`, then `lint --stage text` again until exit 0.
+7. Caption (step 7): write `caption.txt`, invoke each `humanizer` skill in `use` on it, then `lint --stage text` again until exit 0.
 8. `meta --status caption_approved`.
 
 Evidence: keep a number only when the dispatch's `sources` give its source and date and, for a web source, carousel-scout found it on that page; put it in `claims`. Remove every other number: rewrite the slide or caption without it and record it in `removed_claims`. Never leave `needs_confirmation: true`; it fails lint and stalls the run.
@@ -97,6 +97,7 @@ CAROUSELS:
     slides: <n>          lint_text: pass   lint_visual: pass
     caption: |
       <full caption text>
+    skills_used: [..]    (every skill invoked with the Skill tool, by role)
     assumptions: [..]    removed_claims: [..]   open_questions: [..]
   - code: CAR-...  STATUS: BLOCKED  reason: <lint output or error>
 accounts_available:

@@ -5,6 +5,7 @@
 - Add: the `carousel` agent runs on Sonnet (`model: sonnet`) and can be the main session: `claude --agent carousel:carousel --advisor opus`.
 - Add: `carousel-scout` agent on Haiku, read-only (`Read, Grep, Glob, WebFetch, WebSearch`). The carousel agent must hand it the source-page checks and the overlap check against earlier carousels in `carousel-output/<slug>/`.
 - Add: the agent consults the advisor before a carousel's copy locks, after the same error twice, and before the review report; without the advisor it runs those checks itself and says so.
+- Add: every knowledge skill the brand resolves in `use` (hook, script, humanizer) is required: the agent invokes it with the Skill tool and lists it under `skills_used` in the review report.
 - Unchanged: publishing still needs the user's own verbatim `APPROVED:` line per carousel.
 
 ## 0.2.0 - 2026-10-29
