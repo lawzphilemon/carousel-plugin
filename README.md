@@ -98,6 +98,16 @@ The caller must pass your own `APPROVED:` lines verbatim. It must never compose 
 
 The agent locates the plugin files through `${CLAUDE_PLUGIN_ROOT}`; if that is not substituted inside the agent, it falls back to finding them with Glob. This variant is unverified until the release checklist has been run.
 
+## Running as an agent
+
+`agents/carousel.md` can run the whole session as the carousel agent on Sonnet, with Opus as advisor. Start it from your workspace (the folder with `brands/` and `carousel-output/`):
+
+```bash
+claude --agent carousel:carousel --advisor opus
+```
+
+Then ask for carousels as in Agent mode above. It hands read-only lookups (checking the source pages you cite, and earlier carousels in `carousel-output/<slug>/` that overlap the topic) to `carousel-scout` on Haiku. It consults the advisor before a carousel's copy locks, after the same error twice, and before the review report. The advisor needs the Anthropic API and Claude Code with `/advisor` support; without it the agent runs those checks itself. The publish rule does not change: nothing is scheduled without your own `APPROVED:` line.
+
 ## Sheet tracking
 
 Optionally, every scheduled carousel is logged as a row in a Google Sheet: one shared spreadsheet with one tab per brand, or a separate sheet per brand. Add a `tracking` block to the brand (see `examples/acme/brand.json`, with the fictional `EXAMPLE_SHEET_ID`): `sheet_id`, `tab`, `mode` (`append` or `update`), `match_column` and `match_by`, `columns` (the header names of your tab) and `status_values.scheduled`. `/carousel:brand` asks for these. A brand without `tracking` skips the step.
