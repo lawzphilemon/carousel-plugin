@@ -110,7 +110,7 @@ Then ask for carousels as in Agent mode above. It hands read-only lookups (check
 
 ## Sheet tracking
 
-Optionally, every scheduled carousel is logged as a row in a Google Sheet: one shared spreadsheet with one tab per brand, or a separate sheet per brand. Add a `tracking` block to the brand (see `examples/acme/brand.json`, with the fictional `EXAMPLE_SHEET_ID`): `sheet_id`, `tab`, `mode` (`append` or `update`), `match_column` and `match_by`, `columns` (the header names of your tab) and `status_values.scheduled`. `/carousel:brand` asks for these. A brand without `tracking` skips the step.
+Optionally, every scheduled carousel is logged as a row in a Google Sheet: one shared spreadsheet with one tab per brand, or a separate sheet per brand. Add a `tracking` block to the brand (see `examples/acme/brand.json`, with the fictional `EXAMPLE_SHEET_ID`): `sheet_id`, `tab`, `mode` (`append` or `update`), `match_column` and `match_by`, `columns` (the header names of your tab), `status_values.scheduled` and, optionally, `status_values.scheduled_live` for live posts. `/carousel:brand` asks for these. A brand without `tracking` skips the step.
 
 - Share the sheet as **Editor** with the Google account connected to Claude. A sheet owned by another account fails the access check.
 - Header names are matched exactly against row 1 of the tab. Unmapped columns stay empty.
@@ -134,7 +134,7 @@ The eight commands call `engine/cli.mjs`. Each prints JSON on stdout and a summa
 - `knowledge`: resolve which skills to use per role, with fallbacks.
 - `publish-payload`: build the exact Repliz schedule payload (a dry run; sends nothing).
 - `status`: print a project's status and verification result.
-- `meta`: update status and Repliz fields in `meta.json`; `--tracked written|csv|skipped` records the sheet result.
+- `meta`: update status and Repliz fields in `meta.json` (`--live` records a live schedule); `--tracked written|csv|skipped` records the sheet result.
 - `sheet-row`: build the sheet row for a scheduled carousel and write `sheet-row.csv` (offline; a brand without `tracking` prints `"tracked": false`).
 
 ## Tests
@@ -151,7 +151,6 @@ Run it from the repo root. `node --test tests/` fails on Windows with Node 24; u
 - Long copy is not shrunk automatically. Lint flags overflow and you shorten the text.
 - Platform slide limits live in `brand.json` and change over time. Check them against the platform.
 - The contrast rule is 4.5:1 for all text.
-- Sheet tracking writes the same status text (`status_values.scheduled`, for example "Scheduled (draft)") for draft and live posts; word it neutrally if you publish live.
 - `sheet-row.csv` is not formula-neutralized: formula-like text in a topic stays raw if the CSV is opened in a spreadsheet app. The apostrophe rule applies to the direct Sheets writes only.
 - Manual `/carousel:publish` may prompt for permission on the Sheets tool calls, because the Sheets tools are not pre-approved.
 

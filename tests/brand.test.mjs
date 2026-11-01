@@ -115,6 +115,7 @@ const trackingCases = [
   ["tracking.columns.bogus: unknown column key", (t) => { t.columns.bogus = "Bogus"; }],
   ["tracking.status_values.scheduled", (t) => { t.status_values = {}; }],
   ["tracking.tab", (t) => { t.tab = ""; }],
+  ["tracking.status_values.scheduled_live", (t) => { t.status_values.scheduled_live = " "; }],
 ];
 for (const [text, mutate] of trackingCases) {
   test(`tracking error: ${text}`, () => {

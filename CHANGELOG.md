@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 - 2026-11-01
+
+- Fix: live posts no longer get the draft status text in the sheet. `meta --live` records a live schedule, and `sheet-row` writes the brand's optional `tracking.status_values.scheduled_live` for it (falling back to `scheduled`).
+
 ## 0.3.0 - 2026-11-01
 
 - Add: the `carousel` agent runs on Sonnet (`model: sonnet`) and can be the main session: `claude --agent carousel:carousel --advisor opus`.

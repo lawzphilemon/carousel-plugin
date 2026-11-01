@@ -102,3 +102,12 @@ test("folder handles trailing slash and backslashes", () => {
   assert.equal(buildSheetRow(meta(), brand(), dir + "/").cells.Folder, want);
   assert.equal(buildSheetRow(meta(), brand(), String.raw`C:\out\acme\CAR-261030-A1B2_three-numbers` + "\\").cells.Folder, want);
 });
+
+test("live post uses scheduled_live when the brand has it", () => {
+  const b = brand(); b.tracking.status_values.scheduled_live = "Scheduled (live)";
+  const live = meta(); live.repliz.live = true;
+  assert.equal(buildSheetRow(live, b, dir).cells.Status, "Scheduled (live)");
+  assert.equal(buildSheetRow(meta(), b, dir).cells.Status, "Scheduled (draft)");
+  delete b.tracking.status_values.scheduled_live;
+  assert.equal(buildSheetRow(live, b, dir).cells.Status, "Scheduled (draft)");
+});

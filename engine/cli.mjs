@@ -21,7 +21,7 @@ export const FLAGS = {
   knowledge: ["brand", "installed"],
   "publish-payload": ["project", "brands", "account", "at", "live", "existing"],
   status: ["project"],
-  meta: ["project", "status", "account", "schedule-id", "schedule-at", "tracked"],
+  meta: ["project", "status", "account", "schedule-id", "schedule-at", "live", "tracked"],
   "sheet-row": ["project", "brands"],
 };
 
@@ -140,7 +140,7 @@ const handlers = {
   },
 
   meta(args) {
-    const f = parse(args, { project: "value", status: "value", account: "value", "schedule-id": "value", "schedule-at": "value", tracked: "value" }, ["project"]);
+    const f = parse(args, { project: "value", status: "value", account: "value", "schedule-id": "value", "schedule-at": "value", live: "bool", tracked: "value" }, ["project"]);
     needProject(f.project);
     if (f["schedule-at"] !== undefined && (!ISO_UTC.test(f["schedule-at"]) || Number.isNaN(Date.parse(f["schedule-at"])) || new Date(f["schedule-at"]).toISOString().slice(0, 19) !== f["schedule-at"].slice(0, 19))) throw new Error(`--schedule-at must be ISO 8601 UTC, e.g. 2026-11-03T04:00:00Z: ${f["schedule-at"]}`);
     const patch = {};
@@ -156,12 +156,13 @@ const handlers = {
     if (f.account !== undefined) repliz.account = f.account;
     if (f["schedule-id"] !== undefined) repliz.schedule_id = f["schedule-id"];
     if (f["schedule-at"] !== undefined) repliz.schedule_at = f["schedule-at"];
+    if (f.live) repliz.live = true;
     if (Object.keys(repliz).length) patch.repliz = repliz;
     if (f.tracked !== undefined) {
       if (!["written", "csv", "skipped"].includes(f.tracked)) throw new Error("--tracked must be written, csv or skipped");
       patch.tracking = { state: f.tracked, at: new Date().toISOString() };
     }
-    if (!Object.keys(patch).length) throw new Usage("meta needs at least one of --status, --account, --schedule-id, --schedule-at, --tracked");
+    if (!Object.keys(patch).length) throw new Usage("meta needs at least one of --status, --account, --schedule-id, --schedule-at, --live, --tracked");
     const meta = updateMeta(f.project, patch);
     return res(0, meta, `${meta.code}: ${meta.status}`);
   },

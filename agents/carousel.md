@@ -129,7 +129,7 @@ Never change the approved account or time. For each approved carousel follow `co
 2. Step 2: upload the slides and write `uploads.json`. If an upload fails, report that carousel `BLOCKED` (no scheduling, no sheet write).
 3. Step 3: call `repliz_list_accounts` only to confirm the approved account exists for the platform; if not, report it `BLOCKED`.
 4. Step 4: `publish-payload` with the approved account and time (with `--existing` for others in this batch). If it exits 1 (for example a stagger clash or a refused status), report that carousel `BLOCKED` with the error; do not retry with other values.
-5. Step 6: `repliz_create_schedule` with the payload unchanged, read back with `repliz_get_schedule`, compare account, time and media count, then `meta --status scheduled --account ... --schedule-id ... --schedule-at ...`. A failed `repliz_create_schedule` call or a read-back mismatch is reported as `BLOCKED` for that carousel: do not mark it scheduled or track it.
+5. Step 6: `repliz_create_schedule` with the payload unchanged, read back with `repliz_get_schedule`, compare account, time and media count, then `meta --status scheduled --account ... --schedule-id ... --schedule-at ...`, plus `--live` when the approval line says `live: true`. A failed `repliz_create_schedule` call or a read-back mismatch is reported as `BLOCKED` for that carousel: do not mark it scheduled or track it.
 
 ## Sheet tracking (after a confirmed schedule)
 

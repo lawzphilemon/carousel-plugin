@@ -77,6 +77,6 @@
       "scheduled_at": "Scheduled", "account": "Account",
       "repliz_id": "Repliz ID", "folder": "Folder"
     },
-    "status_values": { "scheduled": "Scheduled (draft)" }
+    "status_values": { "scheduled": "Scheduled (draft)", "scheduled_live": "Scheduled (live)" }
   }
 }

@@ -124,4 +124,5 @@ function validateTracking(t, errors) {
     }
   }
   if (!nonEmpty(t.status_values?.scheduled)) errors.push("tracking.status_values.scheduled: must be a non-empty string");
+  if (t.status_values?.scheduled_live !== undefined && !nonEmpty(t.status_values.scheduled_live)) errors.push("tracking.status_values.scheduled_live: must be a non-empty string when set");
 }
