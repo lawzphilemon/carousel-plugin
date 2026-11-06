@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1 - 2026-11-06
+
+- Add: `CAROUSEL_CHROME_MODE=cdp` drives Chrome over the DevTools protocol (`engine/lib/chrome-cdp.mjs`, Node 22 or newer, no dependencies). Found on a headless Linux VPS with Chrome for Testing 145, where the one-shot `--screenshot` and `--dump-dom` flags never finish. The default mode is unchanged.
+- Fix: the temporary Chrome profile is removed with retries, so a helper process that is still writing no longer fails the render with `ENOTEMPTY`.
+- Fix: `commands/make.md` passes `--out <workspace>/carousel-output` to `new` (the engine adds the brand folder); `<out>` had nested the brand folder twice.
+
 ## 0.4.0 - 2026-11-06
 
 - Add: Hermes Agent support. The root `plugin.json` is the Agent Plugins manifest Hermes reads, and the new `carousel-hermes` skill routes `/carousel brand|make|publish` to the existing command files and translates Claude Code tools to Hermes tools (files, shell, questions, web, image display, Repliz MCP, Google Sheets, knowledge skills).

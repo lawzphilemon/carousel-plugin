@@ -5,7 +5,7 @@ A Claude Code plugin that turns a topic into a batch of brand-correct social car
 ## Requirements
 
 - Node 20 or newer. No npm dependencies.
-- Local Chrome or Chromium (used for rendering and visual lint). Pass `--chrome <path>` if it is not found automatically.
+- Local Chrome or Chromium (used for rendering and visual lint). Pass `--chrome <path>` if it is not found automatically. If rendering hangs on a headless Linux host, set `CAROUSEL_CHROME_MODE=cdp` (Node 22 or newer): Chrome is then driven over the DevTools protocol instead of the one-shot `--screenshot` flags.
 - The Repliz MCP connected, only for publishing.
 - The Google Sheets connector, only for sheet tracking (optional).
 

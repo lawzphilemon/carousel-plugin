@@ -97,7 +97,7 @@ test("release 0.3.0 docs: README, commands, changelog, version, specs", () => {
   assert.match(read("commands/publish.md"), /tracked/);
   assert.match(read("commands/publish.md"), /without `tracking`[^\n]*skip/i);
   assert.match(read("commands/brand.md"), /tracking/);
-  assert.equal(JSON.parse(read(".claude-plugin/plugin.json")).version, "0.4.0");
+  assert.equal(JSON.parse(read(".claude-plugin/plugin.json")).version, "0.4.1");
   const cl = read("CHANGELOG.md");
   assert.match(cl, /^## 0\.4\.0\b/m);
   assert.match(cl, /^## 0\.3\.1\b/m);

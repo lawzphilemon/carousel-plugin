@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "carousel",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Brand-safe social carousels for Hermes Agent: copy, render, lint and publish from a private brand profile. Start with the carousel-hermes skill. Claude Code reads .claude-plugin/plugin.json instead.",
   "author": { "name": "Lawrence Philemon" },
   "repository": "https://github.com/lawzphilemon/carousel-plugin",
