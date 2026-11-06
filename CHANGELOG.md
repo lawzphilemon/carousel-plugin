@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 - 2026-11-06
+
+- Add: Hermes Agent support. The root `plugin.json` is the Agent Plugins manifest Hermes reads, and the new `carousel-hermes` skill routes `/carousel brand|make|publish` to the existing command files and translates Claude Code tools to Hermes tools (files, shell, questions, web, image display, Repliz MCP, Google Sheets, knowledge skills).
+- Add: Hermes rules in the skill: no subagents or advisor, approval only from the user in the chat, no publishing from a scheduled run, and a curl fallback for a failing Repliz upload.
+- Unchanged: the engine, the commands, the agents and the Claude Code install. The pipeline and its gates are identical in both hosts.
+
 ## 0.3.1 - 2026-11-01
 
 - Fix: live posts no longer get the draft status text in the sheet. `meta --live` records a live schedule, and `sheet-row` writes the brand's optional `tracking.status_values.scheduled_live` for it (falling back to `scheduled`).
