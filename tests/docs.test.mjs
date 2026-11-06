@@ -97,8 +97,9 @@ test("release 0.3.0 docs: README, commands, changelog, version, specs", () => {
   assert.match(read("commands/publish.md"), /tracked/);
   assert.match(read("commands/publish.md"), /without `tracking`[^\n]*skip/i);
   assert.match(read("commands/brand.md"), /tracking/);
-  assert.equal(JSON.parse(read(".claude-plugin/plugin.json")).version, "0.3.1");
+  assert.equal(JSON.parse(read(".claude-plugin/plugin.json")).version, "0.4.0");
   const cl = read("CHANGELOG.md");
+  assert.match(cl, /^## 0\.4\.0\b/m);
   assert.match(cl, /^## 0\.3\.1\b/m);
   assert.match(cl, /^## 0\.3\.0\b/m);
   assert.match(cl, /^## 0\.2\.0\b/m);
@@ -116,4 +117,22 @@ test("agent model split: carousel on sonnet, read-only scout on haiku", () => {
   assert.match(fm, /^name: carousel-scout$/m);
   assert.match(fm, /^model: haiku$/m);
   assert.match(fm, /^tools: Read, Grep, Glob, WebFetch, WebSearch$/m);
+});
+
+test("hermes support: root manifest, router skill, README, versions in step", () => {
+  const manifest = JSON.parse(read("plugin.json"));
+  assert.equal(manifest.name, "carousel");
+  assert.match(manifest.$schema, /agent-plugins\.org/);
+  assert.equal(manifest.version, JSON.parse(read(".claude-plugin/plugin.json")).version);
+  const market = JSON.parse(read(".claude-plugin/marketplace.json"));
+  assert.equal(market.metadata.version, manifest.version);
+  assert.equal(market.plugins[0].version, manifest.version);
+  const skill = read("skills/carousel-hermes/SKILL.md");
+  assert.match(frontMatter(skill), /^name: carousel-hermes$/m);
+  assert.match(frontMatter(skill), /Hermes Agent only/);
+  for (const f of cmdFiles) assert.ok(skill.includes(`\`${f.replace(/\.md$/, "")}\``), `router skill does not name command ${f}`);
+  for (const w of ["${CLAUDE_PLUGIN_ROOT}", "clarify", "web_search", "MEDIA:", "mcp__repliz__", "google-workspace", "never schedule from a cron run".toLowerCase()]) {
+    assert.ok(skill.toLowerCase().includes(w.toLowerCase()), `router skill missing ${w}`);
+  }
+  assert.match(read("README.md"), /^## Running in Hermes$/m);
 });

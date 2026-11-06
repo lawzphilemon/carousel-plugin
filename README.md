@@ -124,6 +124,16 @@ Optionally, every scheduled carousel is logged as a row in a Google Sheet: one s
 - Slides are uploaded for staging, then scheduled as an album. The default is a **draft**; live scheduling only when you say so for that batch.
 - Before relying on it, schedule one test draft on a test account and check the media in Repliz.
 
+## Running in Hermes
+
+The same repository is also a portable [Agent Plugins](https://agent-plugins.org) package for [Hermes Agent](https://github.com/NousResearch/hermes-agent): the root `plugin.json` is what Hermes reads (Claude Code reads `.claude-plugin/plugin.json`), and the `carousel-hermes` skill is the entry point. It is a router: it reads this plugin's command files and translates their Claude Code tools to Hermes tools, so the pipeline, the gates and the engine are the same in both.
+
+1. Install and enable: `hermes plugins install lawzphilemon/carousel-plugin --enable` (or the Plugin Catalog's GitHub install). Update later with `hermes plugins update`.
+2. Give the profile the `repliz` MCP server (only for publishing). Google access is optional and only used for sheet tracking; without it the CSV fallback applies.
+3. Start Hermes in your workspace (the folder with `brands/` and `carousel-output/`) and ask it to run a carousel command, for example "/carousel make \"topic\" --brand <slug> --count 3". Node 20 or newer and a Chrome or Chromium are needed on the host; pass `--chrome <path>` when the engine cannot find it.
+
+Differences from Claude Code: the `carousel` and `carousel-scout` agents are not used (Hermes runs `make` and `publish` with their approval gates), there is no advisor, and a scheduled Hermes job must never publish: it may prepare copy up to the first gate and stop. Approval has to come from you in the chat, not from another agent.
+
 ## CLI
 
 The eight commands call `engine/cli.mjs`. Each prints JSON on stdout and a summary on stderr; exit code 1 means issues.

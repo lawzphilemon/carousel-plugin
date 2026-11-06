@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Brand-safe social carousel plugin for Claude Code",
-    "version": "0.3.1"
+    "version": "0.4.0"
   },
   "plugins": [
     {
       "name": "carousel",
       "source": "./",
       "description": "Brand-safe social carousels: copy, render, lint and publish from a private brand profile.",
-      "version": "0.3.1",
+      "version": "0.4.0",
       "author": {
         "name": "Lawrence Philemon"
       },
