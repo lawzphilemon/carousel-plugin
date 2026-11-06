@@ -2,7 +2,7 @@ import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const PATHS = [
   "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -31,16 +31,35 @@ function run(chrome, htmlPath, size, extra, budget) {
     if (r.error) throw new Error(`Chrome failed: ${r.error.message}`);
     return r;
   } finally {
-    rmSync(profile, { recursive: true, force: true });
+    // Chrome's helper processes can still write into the profile for a moment after the main process exits (seen on Linux: ENOTEMPTY)
+    rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
   }
 }
 
+// CAROUSEL_CHROME_MODE=cdp drives Chrome over the DevTools protocol (needs Node 22+); use it when the one-shot
+// --screenshot / --dump-dom flags hang, as seen with Chrome for Testing 145 on a headless Linux VPS.
+const useCdp = () => process.env.CAROUSEL_CHROME_MODE === "cdp";
+const CDP = fileURLToPath(new URL("./chrome-cdp.mjs", import.meta.url));
+
+function runCdp(args) {
+  const r = spawnSync(process.execPath, [CDP, ...args], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, timeout: 120000 });
+  if (r.error) throw new Error(`Chrome (cdp) failed: ${r.error.message}`);
+  if (r.status !== 0) throw new Error(`Chrome (cdp) failed: ${(r.stderr || "").trim().slice(-300)}`);
+  return r;
+}
+
 export function chromeScreenshot(chrome, htmlPath, pngPath, size) {
+  if (useCdp()) {
+    runCdp(["screenshot", chrome, htmlPath, pngPath, String(size.width), String(size.height)]);
+    if (!existsSync(pngPath)) throw new Error(`Chrome produced no screenshot for ${htmlPath}`);
+    return;
+  }
   const r = run(chrome, htmlPath, size, [`--screenshot=${pngPath}`], 2000);
   if (!existsSync(pngPath)) throw new Error(`Chrome produced no screenshot for ${htmlPath}: ${r.stderr?.slice(-300)}`);
 }
 
 export function chromeDom(chrome, htmlPath, size) {
+  if (useCdp()) return runCdp(["dom", chrome, htmlPath, String(size.width), String(size.height)]).stdout;
   const r = run(chrome, htmlPath, size, ["--dump-dom"], 3000);
   if (r.status !== 0 || !r.stdout) throw new Error(`Chrome dump-dom failed for ${htmlPath}: ${r.stderr?.slice(-300)}`);
   return r.stdout;

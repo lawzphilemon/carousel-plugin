@@ -35,10 +35,10 @@ The JSON gives, per role (hook, script, humanizer), `use` (skills to invoke) and
 Write N distinct angles on the topic, one folder per carousel. `--slides S` is the target number of slides per carousel; keep it inside the brand's `layout.slides` range and the platform's `max_slides`, and default to the middle of the range when it is not given. Create each folder first:
 
 ```
-node "${CLAUDE_PLUGIN_ROOT}/engine/cli.mjs" new --brand "<slug>" --topic "<topic or angle>" --out "<out>" --brands "<brands>"
+node "${CLAUDE_PLUGIN_ROOT}/engine/cli.mjs" new --brand "<slug>" --topic "<topic or angle>" --out "<workspace>/carousel-output" --brands "<brands>"
 ```
 
-It prints `{ "dir", "code" }`; `dir` is that carousel's `<project>`. Write `<project>/copy.json` in this shape (omit what a slide kind does not use):
+`--out` is the `carousel-output` folder itself: the engine adds the brand folder. It prints `{ "dir", "code" }`; `dir` is that carousel's `<project>`. Write `<project>/copy.json` in this shape (omit what a slide kind does not use):
 
 ```json
 { "code": "CAR-...", "brand": "<slug>", "topic": "...", "platform": "instagram",
