@@ -1,6 +1,7 @@
 import { pathToFileURL } from "node:url";
 import { join } from "node:path";
 import { MEASURE_SCRIPT } from "./measure.mjs";
+import { contrast } from "./color.mjs";
 
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const pad = (n) => String(n).padStart(2, "0");
@@ -69,9 +70,11 @@ export function pageHtml(sections, brand, brandDir, opts = {}) {
   const fontUrl = pathToFileURL(join(brandDir, f.file)).href;
   const baseUrl = pathToFileURL(brandDir + "/").href;
   const btn = brand.cta?.button ?? { bg: c.background_dark, fg: c.text_on_dark };
+  // card text: whichever brand text color reads better on the card (a dark card on a dark slide needs light text)
+  const cardFg = contrast(c.text_on_light, c.card) >= contrast(c.text_on_dark, c.card) ? c.text_on_light : c.text_on_dark;
   const css = `
 @font-face{font-family:"${f.family}";src:url("${fontUrl}");font-weight:100 900;font-display:block}
-:root{--dark:${c.background_dark};--light:${c.background_light};--accent:${c.accent};--ton-dark:${c.text_on_dark};--ton-light:${c.text_on_light};--muted:${c.muted};--card:${c.card};--btn-bg:${btn.bg};--btn-fg:${btn.fg}}
+:root{--dark:${c.background_dark};--light:${c.background_light};--accent:${c.accent};--ton-dark:${c.text_on_dark};--ton-light:${c.text_on_light};--muted:${c.muted};--card:${c.card};--btn-bg:${btn.bg};--btn-fg:${btn.fg};--card-fg:${cardFg}}
 *{box-sizing:border-box}
 html,body{margin:0;width:${W}px;height:${H}px;overflow:hidden;background:var(--dark)}
 body{font-family:"${f.family}",sans-serif;font-weight:${w.body};font-size:${sz.body[0]}px;line-height:1.3}
@@ -101,7 +104,7 @@ h1.title.small{font-size:${sz.title[0]}px}
 .dark .kicker{color:var(--accent)}
 .light .kicker{border-bottom:6px solid var(--accent);padding-bottom:8px}
 .cards{display:flex;flex-direction:column;gap:24px}
-.card{background:var(--card);color:var(--ton-light);border-radius:24px;padding:30px 36px;display:flex;gap:28px;align-items:center;font-size:${sz.body[1]}px}
+.card{background:var(--card);color:var(--card-fg);border-radius:24px;padding:30px 36px;display:flex;gap:28px;align-items:center;font-size:${sz.body[1]}px}
 .tick{flex:none;width:22px;height:22px;border-radius:50%;background:var(--accent)}
 .statval{font-size:${sz.hook[1]}px;font-weight:${w.title};line-height:1;color:var(--accent)}
 .cols{display:flex;gap:28px}

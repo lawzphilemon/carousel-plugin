@@ -84,3 +84,13 @@ test("compare titles use a size inside a configured range; light headlines get e
   assert.match(css, /\.cols h2\{font-size:44px/);
   assert.match(css, /\.light h1\{line-height:1\.18\}/);
 });
+
+test("card text flips to the readable brand color when the card is dark", () => {
+  const css = (b) => pageHtml([slideHtml(copy.slides[2], 2, 7, b)], b, "examples/acme");
+  // acme: light card -> dark text (unchanged behavior)
+  assert.match(css(brand), /--card-fg:#14213D/i);
+  // dark card (e.g. Charcoal) -> light text
+  const dark = { ...brand, palette: { ...brand.palette, card: "#2B2B2B", background_dark: "#1D1D1D", text_on_light: "#1D1D1D" } };
+  assert.match(css(dark), /--card-fg:#FFFFFF/i);
+  assert.match(css(dark), /\.card\{[^}]*color:var\(--card-fg\)/);
+});
